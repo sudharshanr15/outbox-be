@@ -5,15 +5,17 @@
   "scripts": {
     "start": "node ./dist/bin/www",
     "build": "tsc --build",
-    "dev": "nodemon ./src/bin/www.ts"
+    "dev": "nodemon ./src/bin/www"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^9.0.3",
     "@types/express": "^5.0.3",
     "@types/node": "^24.1.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^17.2.0",
     "express": "~4.16.1",
+    "imapflow": "^1.0.191",
     "morgan": "~1.9.1",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
