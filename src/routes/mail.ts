@@ -1,7 +1,10 @@
-var express = require('express');
-var router = express.Router();
+import { Request, Response } from "express";
 
-var es = require("../lib/elasticsearch")
+const express = require('express');
+const router = express.Router();
+
+const es = require("../lib/elasticsearch")
+const { sendResponse } = require("../utils/utils")
 
 const { ImapFlow } = require("imapflow")
 const client = new ImapFlow({
@@ -39,12 +42,44 @@ async function startImap(){
 
 // startImap()
 
-/* GET home page. */
-router.get('/', async function(req, res, next) {
-    let get_all = await es.get_all("mail")
-    get_all = JSON.stringify(get_all)
+// get all mails
+router.get('/', async function(req: Request, res: Response) {
+    let get_all = await es.get_all_mails()
 
-    res.send(get_all)
+    if(get_all.success){
+        const data = get_all.data.hits
+        sendResponse(res, {
+            success: true,
+            data,
+            message: "Mail fetched successfully"
+        })
+    }else{
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to fetch mails"
+        })
+    }
+
 });
+
+router.get("/:user", async function(req: Request, res: Response){
+    let user = req.params.user;
+    let user_mails = await es.get_user_mails(user)
+
+    if(user_mails.success){
+        sendResponse(res, {
+            success: true,
+            data: user_mails,
+            message: "User Mail fetched successfully"
+        })
+    }else{
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to fetch mails"
+        })
+    }
+})
 
 module.exports = router;
