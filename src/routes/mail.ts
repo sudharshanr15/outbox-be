@@ -7,17 +7,25 @@ const es = require("../lib/elasticsearch")
 const { sendResponse } = require("../utils/utils")
 
 const { ImapFlow } = require("imapflow")
-const client = new ImapFlow({
-    host: "imap.gmail.com",
-    port: 993,
-    secure: true,
-    auth: {
+
+const mail_users = [
+    {
         user: process.env.TEST_IMAP_USER1_USER,
         pass: process.env.TEST_IMAP_USER1_PASS
     }
-})
+]
 
-async function startImap(){
+async function startImap({ account }){
+    const client = new ImapFlow({
+        host: "imap.gmail.com",
+        port: 993,
+        secure: true,
+        auth: {
+            user: account.user,
+            pass: account.pass
+        }
+    })
+
     try{
         await client.connect()
         let lock = await client.getMailboxLock('INBOX');
@@ -31,16 +39,21 @@ async function startImap(){
             let { envelope } = await client.fetchOne(message, { envelope: true });
             es.create("mails", envelope)
         }
+
+        client.on('exists', async () => {
+            let latest = await client.fetchOne('*', { envelope: true });
+            console.log(`New Email:`, latest.envelope.subject);
+        });
+
+        console.log("listening to new connections...")
         
     }catch(e){
-    }finally{
-        await client.logout();
     }
 }
 
-// es.ping()
-
-// startImap()
+for(const mail_user of mail_users){
+    startImap({ account: mail_user })
+}
 
 // get all mails
 router.get('/', async function(req: Request, res: Response) {
