@@ -12,7 +12,11 @@ const mail_users = [
     {
         user: process.env.TEST_IMAP_USER1_USER,
         pass: process.env.TEST_IMAP_USER1_PASS
-    }
+    },
+    {
+        user: process.env.TEST_IMAP_USER2_USER,
+        pass: process.env.TEST_IMAP_USER2_PASS
+    },
 ]
 
 async function startImap({ account }){
