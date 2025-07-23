@@ -1,83 +1,20 @@
 import { Request, Response } from "express";
 import { get_all_mails, create, get_user_mails, get_user_label_mails } from "../lib/elasticsearch";
+import { startImap } from "../lib/imapflow";
+import { classifyEmail, loadClassifier } from "../lib/classifier/mail_classifier";
+import { sendResponse } from "../utils/utils";
 
 const express = require('express');
 const router = express.Router();
 
-const es = require("../lib/elasticsearch")
-const { sendResponse } = require("../utils/utils")
-const { classifyEmail, loadClassifier } = require("../lib/classifier/mail_classifier")
-
-const { ImapFlow } = require("imapflow")
-
-const mail_users = [
-    {
-        user: process.env.TEST_IMAP_USER1_USER,
-        pass: process.env.TEST_IMAP_USER1_PASS
-    },
-    {
-        user: process.env.TEST_IMAP_USER2_USER,
-        pass: process.env.TEST_IMAP_USER2_PASS
-    },
-]
-
-async function startImap({ account }){
-    const client = new ImapFlow({
-        host: "imap.gmail.com",
-        port: 993,
-        secure: true,
-        auth: {
-            user: account.user,
-            pass: account.pass
-        }
-    })
-
-    try{
-        await client.connect()
-        let lock = await client.getMailboxLock('INBOX');
-        
-        const since = new Date();
-        since.setDate(since.getDate() - 1);
-        
-        let messages = await client.search({ since })
-
-        for(let message of messages){
-            let { envelope } = await client.fetchOne(message, { envelope: true });
-            let label: string = await classifyEmail(envelope.subject)
-            create("mails", envelope.messageId, {
-                ...envelope,
-                label
-            })
-        }
-
-        client.on('exists', async () => {
-            let {envelope} = await client.fetchOne('*', { envelope: true });
-            let label: string = await classifyEmail(envelope.subject)
-            create("mails", envelope.messageId, {
-                ...envelope,
-                label
-            })
-        });
-
-        console.log("listening to new connections...")
-        
-    }catch(e){
-    }
-}
-
 (async() => {
     await loadClassifier()
-    for(const mail_user of mail_users){
-        await startImap({ account: mail_user })
-    }
-
 })()
-
 
 
 // get all mails
 router.get('/', async function(req: Request, res: Response) {
-    let get_all = await es.get_all_mails()
+    let get_all = await get_all_mails()
 
     if(get_all.success){
         const data = get_all.data.hits
@@ -96,10 +33,29 @@ router.get('/', async function(req: Request, res: Response) {
 
 });
 
+router.post("/", async function(req: Request, res: Response){
+    try{
+        let {users} = req.body
+
+        for(let user in users){
+            await startImap({ account: users[user]})
+        }
+
+        sendResponse(res, {
+            success: true
+        })
+    }catch(err){
+        sendResponse(res, {
+            statusCode: 500,
+            success: false
+        })
+    }
+});
+
 // get mails for a user
 router.get("/user/:user", async function(req: Request, res: Response){
     let user = req.params.user;
-    let user_mails = await es.get_user_mails(user)
+    let user_mails = await get_user_mails(user)
 
     if(user_mails.success){
         sendResponse(res, {
@@ -132,10 +88,11 @@ router.get("/user/:user/label/:label", async function(req: Request, res: Respons
         });
     }
 
-    let user_mails = await es.get_user_label_mails(user, label)
+    let user_mails = await get_user_label_mails(user, label)
 
-    sendResponse(res, {
-        data: user_mails
+    return sendResponse(res, {
+        data: user_mails,
+        success: true
     })
 })
 
