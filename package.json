@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./dist/bin/www",
     "build": "tsc --build",
-    "dev": "nodemon ./src/bin/www"
+    "start:dev": "nodemon ts-node ./src/bin/www"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^9.0.3",
