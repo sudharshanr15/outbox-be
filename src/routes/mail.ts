@@ -5,6 +5,7 @@ const router = express.Router();
 
 const es = require("../lib/elasticsearch")
 const { sendResponse } = require("../utils/utils")
+const { classifyEmail, loadClassifier } = require("../lib/classifier/mail_classifier")
 
 const { ImapFlow } = require("imapflow")
 
@@ -41,7 +42,11 @@ async function startImap({ account }){
 
         for(let message of messages){
             let { envelope } = await client.fetchOne(message, { envelope: true });
-            es.create("mails", envelope)
+            let label = await classifyEmail(envelope.subject)
+            es.create("mails", {
+                ...envelope,
+                label
+            })
         }
 
         client.on('exists', async () => {
@@ -55,9 +60,15 @@ async function startImap({ account }){
     }
 }
 
-for(const mail_user of mail_users){
-    startImap({ account: mail_user })
-}
+// (async() => {
+//     await loadClassifier()
+//     for(const mail_user of mail_users){
+//         await startImap({ account: mail_user })
+//     }
+
+// })()
+
+
 
 // get all mails
 router.get('/', async function(req: Request, res: Response) {
