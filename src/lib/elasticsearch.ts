@@ -32,7 +32,7 @@ async function create(index, document){
   });
 }
 
-async function get_all_mails(): Promise<FunctionResponse>{
+export async function get_all_mails(): Promise<FunctionResponse>{
     try{
         const res = await es_client.search({
             index: "mails",
@@ -52,7 +52,7 @@ async function get_all_mails(): Promise<FunctionResponse>{
     }
 }
 
-async function get_user_mails(user: string): Promise<FunctionResponse>{
+export async function get_user_mails(user: string): Promise<FunctionResponse>{
     try{
         const res = await es_client.search({
             index: "mails",
@@ -72,9 +72,34 @@ async function get_user_mails(user: string): Promise<FunctionResponse>{
     }
 }
 
-module.exports = {
-    ping,
-    create,
-    get_all_mails,
-    get_user_mails
+
+export async function get_user_label_mails(user: string, label: string): Promise<FunctionResponse>{
+    try{
+        const res = await es_client.search({
+            index: "mails",
+            query: {
+                bool: {
+                    must: [
+                        {
+                            match: {
+                                "to.address": user
+                            }
+                        },
+                        {
+                            match: {
+                                "label.keyword": label
+                            }
+                        }
+                    ]
+                }
+            }
+        })
+
+        return {
+            success: true,
+            data: res
+        }
+    }catch(e){
+        return { success: false}
+    }
 }

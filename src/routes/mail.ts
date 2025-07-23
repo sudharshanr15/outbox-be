@@ -91,7 +91,8 @@ router.get('/', async function(req: Request, res: Response) {
 
 });
 
-router.get("/:user", async function(req: Request, res: Response){
+// get mails for a user
+router.get("/user/:user", async function(req: Request, res: Response){
     let user = req.params.user;
     let user_mails = await es.get_user_mails(user)
 
@@ -108,6 +109,28 @@ router.get("/:user", async function(req: Request, res: Response){
             message: "Failed to fetch mails"
         })
     }
+})
+
+// get mails for a user based on label
+router.get("/user/:user/label/:label", async function(req: Request, res: Response){
+    let user = req.params.user;
+    let label = req.params.label;
+
+    let valid_labels = ["Spam", "Not Interested", "Interested", "Out Of Office", "Meeting Booked"]
+
+    if(valid_labels.find(el => el.toLowerCase() == label.toLowerCase()) == undefined){
+        return sendResponse(res, {
+            statusCode: 400,
+            success: false,
+            message: "Label not found"
+        });
+    }
+
+    let user_mails = await es.get_user_label_mails(user, label)
+
+    sendResponse(res, {
+        data: user_mails
+    })
 })
 
 module.exports = router;
