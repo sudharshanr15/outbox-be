@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./src/bin/www"
+    "start": "node ./dist/bin/www",
+    "build": "tsc --build",
+    "dev": "nodemon ./src/bin/www.ts"
   },
   "dependencies": {
     "@types/express": "^5.0.3",
