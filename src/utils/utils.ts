@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { ApiResponse } from "../types";
 
-function sendResponse(res: Response, {statusCode = Number(200), success = true, message 
+export function sendResponse(res: Response, {statusCode = Number(200), success = true, message 
     = "", data, errors
 }: ApiResponse){
     return res.status(statusCode).json({
@@ -10,8 +10,4 @@ function sendResponse(res: Response, {statusCode = Number(200), success = true, 
         data,
         errors
     })
-}
-
-module.exports =  {
-    sendResponse
 }

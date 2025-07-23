@@ -1,3 +1,5 @@
+import { post_message } from "./slack"
+
 type FunctionResponse = {
     success: boolean,
     message?: string
@@ -33,6 +35,10 @@ export async function create(index: string, id: string, document: any){
         op_type: 'create',
         document
     });
+    if(document.label.toLowerCase() == "interested"){
+        console.log("sending to slack")
+        post_message(document)
+    }
   }catch(error){
     console.log("error on index creation")
   }

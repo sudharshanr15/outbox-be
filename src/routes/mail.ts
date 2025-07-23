@@ -43,7 +43,7 @@ async function startImap({ account }){
 
         for(let message of messages){
             let { envelope } = await client.fetchOne(message, { envelope: true });
-            let label = await classifyEmail(envelope.subject)
+            let label: string = await classifyEmail(envelope.subject)
             create("mails", envelope.messageId, {
                 ...envelope,
                 label
@@ -51,8 +51,12 @@ async function startImap({ account }){
         }
 
         client.on('exists', async () => {
-            let latest = await client.fetchOne('*', { envelope: true });
-            console.log(`New Email:`, latest.envelope.subject);
+            let {envelope} = await client.fetchOne('*', { envelope: true });
+            let label: string = await classifyEmail(envelope.subject)
+            create("mails", envelope.messageId, {
+                ...envelope,
+                label
+            })
         });
 
         console.log("listening to new connections...")
@@ -115,11 +119,12 @@ router.get("/user/:user", async function(req: Request, res: Response){
 // get mails for a user based on label
 router.get("/user/:user/label/:label", async function(req: Request, res: Response){
     let user = req.params.user;
-    let label = req.params.label;
+    let label: string | undefined = req.params.label;
 
     let valid_labels = ["Spam", "Not Interested", "Interested", "Out Of Office", "Meeting Booked"]
 
-    if(valid_labels.find(el => el.toLowerCase() == label.toLowerCase()) == undefined){
+    label = valid_labels.find(el => el.toLowerCase() == label?.toLowerCase())
+    if(label == undefined){
         return sendResponse(res, {
             statusCode: 400,
             success: false,
