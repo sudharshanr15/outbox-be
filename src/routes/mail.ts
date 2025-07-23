@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { get_all_mails, create, get_user_mails, get_user_label_mails } from "../lib/elasticsearch";
 
 const express = require('express');
 const router = express.Router();
@@ -43,7 +44,7 @@ async function startImap({ account }){
         for(let message of messages){
             let { envelope } = await client.fetchOne(message, { envelope: true });
             let label = await classifyEmail(envelope.subject)
-            es.create("mails", {
+            create("mails", envelope.messageId, {
                 ...envelope,
                 label
             })
@@ -60,13 +61,13 @@ async function startImap({ account }){
     }
 }
 
-// (async() => {
-//     await loadClassifier()
-//     for(const mail_user of mail_users){
-//         await startImap({ account: mail_user })
-//     }
+(async() => {
+    await loadClassifier()
+    for(const mail_user of mail_users){
+        await startImap({ account: mail_user })
+    }
 
-// })()
+})()
 
 
 

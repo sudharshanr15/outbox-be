@@ -25,11 +25,17 @@ async function ping(){
     });
 }
 
-async function create(index, document){
-  await es_client.index({
-    index,
-    document
-  });
+export async function create(index: string, id: string, document: any){
+  try{
+    await es_client.index({
+        index,
+        id,
+        op_type: 'create',
+        document
+    });
+  }catch(error){
+    console.log("error on index creation")
+  }
 }
 
 export async function get_all_mails(): Promise<FunctionResponse>{
