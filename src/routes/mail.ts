@@ -54,8 +54,15 @@ router.post("/", async function(req: Request, res: Response){
 
 // get mails for a user
 router.get("/user/:user", async function(req: Request, res: Response){
+    let from: any = req.query.from as string;
+    if(from == undefined){
+        from = 1
+    }else{
+        from = parseInt(from)
+    }
+        
     let user = req.params.user;
-    let user_mails = await get_user_mails(user)
+    let user_mails = await get_user_mails(user, from)
 
     if(user_mails.success){
         sendResponse(res, {

@@ -64,7 +64,7 @@ export async function get_all_mails(): Promise<FunctionResponse>{
     }
 }
 
-export async function get_user_mails(user: string): Promise<FunctionResponse>{
+export async function get_user_mails(user: string, from = 1): Promise<FunctionResponse>{
     try{
         const res = await es_client.search({
             index: "mails",
@@ -72,7 +72,9 @@ export async function get_user_mails(user: string): Promise<FunctionResponse>{
                 match: {
                     "to.address": user
                 }
-            }
+            },
+            size: 50,
+            from: from
         })
 
         return {
@@ -104,7 +106,8 @@ export async function get_user_label_mails(user: string, label: string): Promise
                         }
                     ]
                 }
-            }
+            },
+            size: 50
         })
 
         return {
@@ -136,7 +139,8 @@ export async function search_user_mails(user: string, search: string){
                         }
                     ]
                 }
-            }
+            },
+            size: 50
         })
 
         return {

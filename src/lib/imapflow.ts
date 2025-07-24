@@ -18,7 +18,7 @@ export async function startImap({ account }){
         let lock = await client.getMailboxLock('INBOX');
         
         const since = new Date();
-        since.setDate(since.getDate() - 1);
+        since.setDate(since.getDate() - 30);
         
         let messages: any = await client.search({ since })
 
