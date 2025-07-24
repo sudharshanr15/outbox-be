@@ -70,7 +70,7 @@ export async function get_user_mails(user: string, from = 1): Promise<FunctionRe
             index: "mails",
             query: {
                 match: {
-                    "to.address": user
+                    "to.address.keyword": user
                 }
             },
             size: 50,

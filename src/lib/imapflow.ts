@@ -2,18 +2,18 @@ import { ImapFlow } from "imapflow";
 import { classifyEmail } from "./classifier/mail_classifier";
 import { create } from "./elasticsearch";
 
-export async function startImap({ account }){
-    const client = new ImapFlow({
-        host: "imap.gmail.com",
-        port: 993,
-        secure: true,
-        auth: {
-            user: account.user,
-            pass: account.pass
-        }
-    })
-
+export async function startImap({ account }){    
     try{
+        const client = new ImapFlow({
+            host: "imap.gmail.com",
+            port: 993,
+            secure: true,
+            auth: {
+                user: account.user,
+                pass: account.pass
+            }
+        })
+        
         await client.connect()
         let lock = await client.getMailboxLock('INBOX');
         
