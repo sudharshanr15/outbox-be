@@ -31,6 +31,8 @@ export async function startImap({ account }){
             })
         }
 
+        let keepAliveInterval = setInterval(keepAlive, 5 * 60 * 1000);
+
         client.on('exists', async () => {
             let {envelope}: any = await client.fetchOne('*', { envelope: true });
             let label: string = await classifyEmail(envelope.subject)
@@ -40,7 +42,28 @@ export async function startImap({ account }){
             })
         });
 
+        client.on('close', async () => {
+            console.log("Connection closed, reconnecting...");
+            await reconnect();
+        });
+
         console.log("listening to new connections...")
+
+        async function reconnect() {
+            try {
+                await client.logout();
+            } catch {}
+            await client.connect();
+        }
+
+        async function keepAlive() {
+            try {
+                await client.noop();
+            } catch (e) {
+                console.error("Keep-alive failed, reconnecting...", e);
+                await reconnect();
+            }
+        }
         
     }catch(e){
     }
