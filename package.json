@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./dist/bin/www",
+    "start": "ts-node ./src/bin/www",
     "build": "tsc --build && ncp ./src/lib/classifier/classifier.json ./dist/lib/classifier/classifier.json",
     "start:dev": "nodemon --watch src --ext ts --exec ts-node src/bin/www.ts",
     "train": "ts-node ./src/lib/classifier/train.ts"
