@@ -115,3 +115,35 @@ export async function get_user_label_mails(user: string, label: string): Promise
         return { success: false}
     }
 }
+
+export async function search_user_mails(user: string, search: string){
+    try{
+        const res = await es_client.search({
+            index: "mails",
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "to.address": user
+                            }
+                        },
+                        {
+                            "multi_match": {
+                                "query": search,
+                                "fields": ["subject", "from.name"]
+                            }
+                        }
+                    ]
+                }
+            }
+        })
+
+        return {
+            success: true,
+            data: res
+        }
+    }catch(e){
+        return { success: false}
+    }
+}

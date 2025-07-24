@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { get_all_mails, create, get_user_mails, get_user_label_mails } from "../lib/elasticsearch";
+import { get_all_mails, create, get_user_mails, get_user_label_mails, search_user_mails } from "../lib/elasticsearch";
 import { startImap } from "../lib/imapflow";
 import { classifyEmail, loadClassifier } from "../lib/classifier/mail_classifier";
 import { sendResponse } from "../utils/utils";
@@ -89,6 +89,18 @@ router.get("/user/:user/label/:label", async function(req: Request, res: Respons
     }
 
     let user_mails = await get_user_label_mails(user, label)
+
+    return sendResponse(res, {
+        data: user_mails,
+        success: true
+    })
+})
+
+router.get("/user/:user/search/:search", async function(req: Request, res: Response){
+    let user = req.params.user;
+    let search: string = req.params.search;
+
+    let user_mails = await search_user_mails(user, search)
 
     return sendResponse(res, {
         data: user_mails,
