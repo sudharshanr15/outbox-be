@@ -1,9 +1,35 @@
+import { Request, Response } from "express";
 import { post_message } from "../lib/slack";
 import { sendResponse } from "../utils/utils"
+import { verify_client } from "../lib/imapflow";
 
 var express = require('express');
 var router = express.Router();
 
+router.post("/verify", async function(req: Request, res: Response){
+    let user = req.body.user;
+    let pass = req.body.pass;
+
+    if(user == undefined || pass == undefined){
+        return sendResponse(res, {
+            success: false,
+            statusCode: 400,
+            message: JSON.stringify(req.params),
+        })
+    }
+
+    const result = await verify_client({ user, pass })
+    if(result.success){
+        return sendResponse(res, {
+            success: true
+        })
+    }
+
+    return sendResponse(res, {
+        success: false,
+        message: "Client not verified"
+    })
+});
 
 /* GET users listing. */
 router.post('/slack/send', async function(req, res, next) {

@@ -45,3 +45,27 @@ export async function startImap({ account }){
     }catch(e){
     }
 }
+
+export async function verify_client({ user, pass }){
+    try{
+        const client = new ImapFlow({
+            host: "imap.gmail.com",
+            port: 993,
+            secure: true,
+            auth: {
+                user,
+                pass
+            }
+        })
+
+        await client.connect()
+
+        return {
+            success: true
+        }
+    }catch(err){
+        return {
+            success: false
+        }
+    }
+}
