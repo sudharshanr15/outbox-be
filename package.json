@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./dist/bin/www",
-    "build": "tsc --build",
-    "start:dev": "nodemon ts-node ./src/bin/www",
+    "build": "tsc --build && ncp ./src/lib/classifier/classifier.json ./dist/lib/classifier/classifier.json",
+    "start:dev": "nodemon --watch src --ext ts --exec ts-node src/bin/www.ts",
     "train": "ts-node ./src/lib/classifier/train.ts"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "imapflow": "^1.0.191",
     "morgan": "~1.9.1",
     "natural": "^8.1.0",
+    "ncp": "^2.0.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

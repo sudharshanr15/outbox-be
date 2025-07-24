@@ -50,7 +50,6 @@ let classifier: natural.BayesClassifier | null = null;
 const training_data_path = path.resolve(__dirname, "emails.csv");
 const weights_path = path.resolve(__dirname, "classifier.json");
 
-// ✅ TRAIN FUNCTION — waits for training to complete
 export async function train(): Promise<void> {
   return new Promise((resolve, reject) => {
     const newClassifier = new natural.BayesClassifier();

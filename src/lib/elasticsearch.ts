@@ -9,9 +9,9 @@ type FunctionResponse = {
 const elasticsearch = require("@elastic/elasticsearch")
 
 const es_client = new elasticsearch.Client({
-    node: "http://localhost:9200",
+    node: process.env.ELASTIC_SEARCH_HOST,
     auth: {
-        apiKey: "R0xVaU41Z0JaaFdJRm82WDI0eHk6RDZNV2VsX0J6bU5sN0NDbEVEd0RtQQ=="
+        apiKey: process.env.ELASTIC_SEARCH_API_KEY
     }
 })
 
