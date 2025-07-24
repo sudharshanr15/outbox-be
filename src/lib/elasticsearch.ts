@@ -50,7 +50,14 @@ export async function get_all_mails(): Promise<FunctionResponse>{
             index: "mails",
             query: {
                 match_all: {}
-            }
+            },
+            sort: [
+                {
+                    "date": {
+                        "order": "desc",
+                    }
+                }
+            ]
         })
         
         return {
@@ -73,6 +80,13 @@ export async function get_user_mails(user: string, from = 1): Promise<FunctionRe
                     "to.address.keyword": user
                 }
             },
+            sort: [
+                {
+                    "date": {
+                        "order": "desc",
+                    }
+                }
+            ],
             size: 50,
             from: from
         })
@@ -107,6 +121,13 @@ export async function get_user_label_mails(user: string, label: string): Promise
                     ]
                 }
             },
+            sort: [
+                {
+                    "date": {
+                        "order": "desc",
+                    }
+                }
+            ],
             size: 50
         })
 
@@ -140,6 +161,13 @@ export async function search_user_mails(user: string, search: string){
                     ]
                 }
             },
+            sort: [
+                {
+                    "date": {
+                        "order": "desc",
+                    }
+                }
+            ],
             size: 50
         })
 
