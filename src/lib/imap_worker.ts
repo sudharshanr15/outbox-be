@@ -1,8 +1,9 @@
-import { ImapFlow, ImapFlowOptions } from "imapflow";
+import { parentPort, workerData } from "worker_threads";
+import { ImapFlow } from 'imapflow'
 import { classifyEmail } from "./classifier/mail_classifier";
 import { create } from "./elasticsearch";
 
-export async function imap_config({ user, pass}): Promise<{}>{
+export async function imap_config({ user, pass}){
     return new Promise((res, rej) => {
         res({
             host: "imap.gmail.com",
@@ -12,17 +13,20 @@ export async function imap_config({ user, pass}): Promise<{}>{
                 user,
                 pass
             },
+            socketTimeout: 240000
         })
     })
 }
 
 export async function start_imap(config){
-    const { ImapFlow } = require('imapflow');
 
+    
+    parentPort!.postMessage(config)
     let c = new ImapFlow(config);
+
     c.on("error", (err) => {
         console.log("ERROR: ")
-        c.log.error(err)
+        console.log(err)
     })
 
     c.on('close', (...args) => {
@@ -46,15 +50,16 @@ export async function start_imap(config){
 
     c.on('exists', updateEvent => {
         c.fetchAll("*", { envelope: true}).then(messages => {
-            // for (let message of messages) {
-            //     console.log('EXISTS UPDATE: ' + message.envelope.subject);
-            //     classifyEmail(message.envelope.subject).then(label => {
-            //         create("mails", message.envelope.messageId, { ...message.envelope, label });
-            //     })
-            // }
+            for (let message of messages) {
+                console.log('EXISTS UPDATE: ' + message.envelope!.subject);
+                classifyEmail(message.envelope!.subject as string).then(label => {
+                    create("mails", message.envelope!.messageId as string, { ...message.envelope, label });
+                }).catch((err) => {
+                    console.log("ERROR on classifying mail")
+                })
+            }
         }).catch(err => {
-            console.error('Update ERROR');
-            console.error(err);
+            return Promise.reject(err)
         });
     });
 
@@ -62,63 +67,46 @@ export async function start_imap(config){
         console.log('EXPUNGE UPDATE');
     });
 
-    setTimeout(() => {
-        console.log(c.stats());
-    }, 1000);
+    // setTimeout(() => {
+    //     console.log(c.stats());
+    // }, 1000);
 
     c.connect()
     .then(async () => {
         console.log("CONNECTION ESTABLISHED");
-
-        console.log(c.serverInfo)
-        console.log(c.namespace)
-        console.log(c.enabled)
-        console.log(c.tls)
 
         await c.mailboxOpen('INBOX');
 
         console.log("FETCHING")
 
         let date = new Date();
-        date.setDate(date.getDate() - 1);
+        date.setDate(date.getDate() - 30);
 
         c.fetchAll({ since: date }, { envelope: true}).then(messages => {
             console.log('FETCH RESULTS');
-            // for (let message of messages) {
-            //     classifyEmail(message.envelope.subject).then(label => {
-            //         create("mails", message.envelope.messageId, { ...message.envelope, label });
-            //     })
-            // }
+            for (let message of messages) {
+                classifyEmail(message.envelope!.subject as string).then(label => {
+                    create("mails", message.envelope!.messageId as string, { ...message.envelope, label });
+                }).catch((err) => {
+                    console.log("ERROR on classifying mail")
+                })
+            }
         }).catch(err => {
-            console.error('FETCH ERROR');
-            console.error(err);
+            return Promise.reject(err)
         });
 
         c.idle().catch(err => {
-            console.error(err);
+            return Promise.reject(err)
         });
 
     })
     .catch(err => {
-        console.error(err);
         c.close();
+        return Promise.reject(err)
     });
 }
-
-export async function verify_client({ user, pass }){
-    try{
-        let config = await imap_config({ user, pass });
-        const client = new ImapFlow(config as ImapFlowOptions)
-
-        await client.connect()
-
-        client.close()
-        return {
-            success: true
-        }
-    }catch(err){
-        return {
-            success: false
-        }
-    }
-}
+imap_config(workerData).then((res) => {
+    start_imap(res).catch(err => parentPort!.postMessage(err))
+}).catch(err => {
+    parentPort!.postMessage("error")
+})

@@ -1,10 +1,42 @@
 import { Request, Response } from "express";
 import { post_message } from "../lib/slack";
 import { sendResponse } from "../utils/utils"
-import { imap_config, start_imap, verify_client } from "../lib/imapflow";
+import { imap_config, verify_client } from "../lib/imapflow";
+import { Worker } from "worker_threads";
+import path from "path";
 
 var express = require('express');
 var router = express.Router();
+
+router.post("/test", function(req: Request, res: Response){
+
+    let user = req.body.user;
+    let pass = req.body.pass;
+
+    const worker = new Worker(path.resolve(__dirname, "../lib/imap_worker.ts"), {
+        workerData: {
+            user,
+            pass
+        },
+        execArgv: ['-r', 'ts-node/register'] 
+    })
+
+    worker.on("message", (data) => {
+        console.log(data)
+    })
+    // worker.on("error", (data) => {
+    //     sendResponse(res, {
+    //         success: true,
+    //         data,
+    //     })
+    // })
+
+    sendResponse(res, {
+        success: true,
+        message: "message"
+    })
+
+});
 
 router.post("/verify", async function(req: Request, res: Response){
     let user = req.body.user;
@@ -20,8 +52,15 @@ router.post("/verify", async function(req: Request, res: Response){
 
     const result = await verify_client({ user, pass })
     if(result.success){
-        imap_config({ user, pass }).then(async (config) => {
-            start_imap(config);
+        imap_config({ user, pass }).then((config) => {
+                const worker = new Worker(path.resolve(__dirname, "../lib/imap_worker.ts"), {
+                    workerData: { user, pass },
+                    execArgv: ['-r', 'ts-node/register'] 
+                })
+
+                worker.on("message", (data) => {
+                    console.log(data)
+                })
         });
 
         return sendResponse(res, {

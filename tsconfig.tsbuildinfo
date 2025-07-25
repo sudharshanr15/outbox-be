@@ -1,0 +1,1 @@
+{"root":["./src/app.js","./src/types.ts","./src/bin/www.ts","./src/lib/elasticsearch.ts","./src/lib/imap_worker.ts","./src/lib/imapflow.ts","./src/lib/slack.ts","./src/lib/webhook.ts","./src/lib/classifier/mail_classifier.ts","./src/lib/classifier/train.ts","./src/routes/index.js","./src/routes/mail.ts","./src/routes/users.ts","./src/utils/utils.ts"],"version":"5.8.3"}

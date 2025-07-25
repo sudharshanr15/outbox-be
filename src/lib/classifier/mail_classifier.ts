@@ -33,7 +33,7 @@ export async function train(): Promise<void> {
   });
 }
 
-export async function loadClassifier(): Promise<void> {
+export async function loadClassifier(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     natural.BayesClassifier.load(weights_path, null, (err, loaded) => {
       if (err || !loaded) {
@@ -42,12 +42,15 @@ export async function loadClassifier(): Promise<void> {
       }
       classifier = loaded;
       console.log("Classifier loaded");
-      resolve();
+      resolve(true);
     });
   });
 }
 
-export function classifyEmail(title: string): Promise<string | null> {
+export async function classifyEmail(title: string): Promise<string | null> {
+  if(classifier == null)
+    await loadClassifier()
+
   return new Promise((res, rej) => {
       if (classifier == null) rej();
       res(classifier!.classify(title));
