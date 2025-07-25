@@ -13,7 +13,7 @@ export async function imap_config({ user, pass}){
                 user,
                 pass
             },
-            socketTimeout: 240000
+            socketTimeout: 0
         })
     })
 }
@@ -31,6 +31,7 @@ export async function start_imap(config){
 
     c.on('close', (...args) => {
         console.log('CLOSE');
+        start_imap(config)
         console.log('args', ...args);
     });
 
