@@ -1,4 +1,5 @@
 import { post_message } from "./slack"
+import { post_webbook } from "./webhook"
 
 type FunctionResponse = {
     success: boolean,
@@ -36,8 +37,9 @@ export async function create(index: string, id: string, document: any){
         document
     });
     if(document.label.toLowerCase() == "interested"){
-        console.log("sending to slack")
+        console.log("sending to slack and webhook.....")
         post_message(document)
+        post_webbook(document)
     }
   }catch(error){
     console.log("error on index creation")
@@ -66,7 +68,8 @@ export async function get_all_mails(): Promise<FunctionResponse>{
         }
     }catch(e){
         return {
-            success: false
+            success: false,
+            data: e
         }
     }
 }

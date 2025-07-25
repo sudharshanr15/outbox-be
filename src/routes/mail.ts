@@ -15,6 +15,7 @@ const router = express.Router();
 // get all mails
 router.get('/', async function(req: Request, res: Response) {
     let get_all = await get_all_mails()
+    console.log(get_all)
 
     if(get_all.success){
         const data = get_all.data.hits

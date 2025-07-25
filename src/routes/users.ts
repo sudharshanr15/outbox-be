@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { post_message } from "../lib/slack";
 import { sendResponse } from "../utils/utils"
-import { startImap, verify_client } from "../lib/imapflow";
+import { init_user, startImap, verify_client } from "../lib/imapflow";
 
 var express = require('express');
 var router = express.Router();
@@ -21,6 +21,7 @@ router.post("/verify", async function(req: Request, res: Response){
     const result = await verify_client({ user, pass })
     if(result.success){
         startImap({ account: { user, pass } });
+        // init_user({ account: { user, pass } });
 
         return sendResponse(res, {
             success: true
@@ -29,7 +30,8 @@ router.post("/verify", async function(req: Request, res: Response){
 
     return sendResponse(res, {
         success: false,
-        message: "Client not verified"
+        message: "Client not verified",
+        data: result
     })
 });
 
