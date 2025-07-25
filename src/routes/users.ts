@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { post_message } from "../lib/slack";
 import { sendResponse } from "../utils/utils"
-import { init_user, startImap, verify_client } from "../lib/imapflow";
+import { imap_config, start_imap, verify_client } from "../lib/imapflow";
 
 var express = require('express');
 var router = express.Router();
@@ -20,8 +20,9 @@ router.post("/verify", async function(req: Request, res: Response){
 
     const result = await verify_client({ user, pass })
     if(result.success){
-        startImap({ account: { user, pass } });
-        // init_user({ account: { user, pass } });
+        imap_config({ user, pass }).then(async (config) => {
+            start_imap(config);
+        });
 
         return sendResponse(res, {
             success: true

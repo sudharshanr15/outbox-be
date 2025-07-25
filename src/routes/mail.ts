@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { get_all_mails, create, get_user_mails, get_user_label_mails, search_user_mails } from "../lib/elasticsearch";
-import { startImap } from "../lib/imapflow";
+import { imap_config, start_imap } from "../lib/imapflow";
 import { classifyEmail, loadClassifier } from "../lib/classifier/mail_classifier";
 import { sendResponse } from "../utils/utils";
 
@@ -39,7 +39,14 @@ router.post("/", async function(req: Request, res: Response){
         let {users} = req.body
 
         for(let user in users){
-            await startImap({ account: users[user]})
+            imap_config(users[user]).then(async (config) => {
+                await start_imap(config);
+            }).catch(err => {
+                sendResponse(res, {
+                    statusCode: 500,
+                    success: false
+                })
+            });
         }
 
         sendResponse(res, {

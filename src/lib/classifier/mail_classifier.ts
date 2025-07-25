@@ -1,45 +1,3 @@
-// import natural from "natural"
-// import fs from "fs"
-// import csvParser from "csv-parser";
-// import path from "path";
-
-// let classifier: natural.BayesClassifier | undefined = new natural.BayesClassifier();
-
-// const training_data_path = path.resolve(__dirname, "emails.csv");
-// const weights_path = path.resolve(__dirname, "classifier.json")
-
-// export async function train(){
-//     fs.createReadStream(training_data_path)
-//     .pipe(csvParser())
-//     .on("data", (row) => {
-//         classifier!.addDocument(row.email_text, row.label);
-//     })
-//     .on("end", () => {
-//         classifier!.save(weights_path, (err) => {
-//             if (err) console.error("Error:", err);
-//             else console.log("Classifier trained and saved.");
-//         });
-//     });
-// }
-
-// export async function loadClassifier(){
-//     return new Promise((res, rej)=>{
-//         natural.BayesClassifier.load(weights_path, null, (err, classifier) => {
-//             if(err){
-//                 console.log("Unable to load classifier")
-//             }else{
-//                 classifier!.classify("hello")
-//                 res(classifier)
-//             }
-//         })
-//     })
-// }
-
-// export async function classifyEmail(title: string){
-//   if (!classifier) throw new Error("Classifier not loaded");
-//   return classifier.classify(title);
-// }
-
 import natural from "natural"
 import fs from "fs"
 import csvParser from "csv-parser";
@@ -89,7 +47,9 @@ export async function loadClassifier(): Promise<void> {
   });
 }
 
-export function classifyEmail(title: string): string {
-  if (!classifier) throw new Error("Classifier not loaded");
-  return classifier.classify(title);
+export function classifyEmail(title: string): Promise<string | null> {
+  return new Promise((res, rej) => {
+      if (classifier == null) rej();
+      res(classifier!.classify(title));
+  })
 }

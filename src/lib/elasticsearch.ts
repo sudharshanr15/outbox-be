@@ -42,7 +42,7 @@ export async function create(index: string, id: string, document: any){
         post_webbook(document)
     }
   }catch(error){
-    console.log("error on index creation")
+    console.log("index already exists")
   }
 }
 
