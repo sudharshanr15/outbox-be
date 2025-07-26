@@ -75,7 +75,7 @@ router.get("/user/:user", async function(req: Request, res: Response){
     if(user_mails.success){
         sendResponse(res, {
             success: true,
-            data: user_mails,
+            data: user_mails.data,
             message: "User Mail fetched successfully"
         })
     }else{
@@ -106,7 +106,7 @@ router.get("/user/:user/label/:label", async function(req: Request, res: Respons
     let user_mails = await get_user_label_mails(user, label)
 
     return sendResponse(res, {
-        data: user_mails,
+        data: user_mails.data,
         success: true
     })
 })
@@ -118,7 +118,7 @@ router.get("/user/:user/search/:search", async function(req: Request, res: Respo
     let user_mails = await search_user_mails(user, search)
 
     return sendResponse(res, {
-        data: user_mails,
+        data: user_mails.data,
         success: true
     })
 })
