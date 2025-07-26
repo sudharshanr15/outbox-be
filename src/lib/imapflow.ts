@@ -1,6 +1,8 @@
 import { ImapFlow, ImapFlowOptions } from "imapflow";
 import { classifyEmail } from "./classifier/mail_classifier";
 import { create } from "./elasticsearch";
+import socket_client from "../lib/socket_client"
+
 
 export async function imap_config({ user, pass}): Promise<{}>{
     return new Promise((res, rej) => {

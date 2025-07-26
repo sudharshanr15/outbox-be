@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 
+import socket_client from "../lib/socket_client"
+
 var app = require('../app');
 var debug = require('debug')('outbox:server');
 var http = require('http');
@@ -20,7 +22,13 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-
+socket_client.connect(server)
+socket_client.getConnection().io.on("connection", (socket) => {
+  socket.on("join-room", room => {
+    console.log("Joining room: " + room)
+    socket.join(room)
+  })
+})
 /**
  * Listen on provided port, on all network interfaces.
  */

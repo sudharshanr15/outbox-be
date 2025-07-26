@@ -4,6 +4,8 @@ import { sendResponse } from "../utils/utils"
 import { imap_config, verify_client } from "../lib/imapflow";
 import { Worker } from "worker_threads";
 import path from "path";
+import { create } from "../lib/elasticsearch";
+import socket_client from "../lib/socket_client";
 
 var express = require('express');
 var router = express.Router();
@@ -58,8 +60,8 @@ router.post("/verify", async function(req: Request, res: Response){
                     execArgv: ['-r', 'ts-node/register'] 
                 })
 
-                worker.on("message", (data) => {
-                    console.log(data)
+                worker.on("message", (data: any) => {
+                    create(data)
                 })
         });
 

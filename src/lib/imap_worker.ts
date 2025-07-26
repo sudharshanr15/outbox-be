@@ -20,8 +20,6 @@ export async function imap_config({ user, pass}){
 
 export async function start_imap(config){
 
-    
-    parentPort!.postMessage(config)
     let c = new ImapFlow(config);
 
     c.on("error", (err) => {
@@ -54,7 +52,12 @@ export async function start_imap(config){
             for (let message of messages) {
                 console.log('EXISTS UPDATE: ' + message.envelope!.subject);
                 classifyEmail(message.envelope!.subject as string).then(label => {
-                    create("mails", message.envelope!.messageId as string, { ...message.envelope, label });
+                    // create("mails", message.envelope!.messageId as string, { ...message.envelope, label });
+                    parentPort!.postMessage({
+                        index: "mails",
+                        id: message.envelope!.messageId as string,
+                        document: { ...message.envelope, label }
+                    });
                 }).catch((err) => {
                     console.log("ERROR on classifying mail")
                 })
@@ -87,7 +90,12 @@ export async function start_imap(config){
             console.log('FETCH RESULTS');
             for (let message of messages) {
                 classifyEmail(message.envelope!.subject as string).then(label => {
-                    create("mails", message.envelope!.messageId as string, { ...message.envelope, label });
+                    parentPort!.postMessage({
+                        index: "mails",
+                        id: message.envelope!.messageId as string,
+                        document: { ...message.envelope, label }
+                    });
+                    
                 }).catch((err) => {
                     console.log("ERROR on classifying mail")
                 })
@@ -109,5 +117,6 @@ export async function start_imap(config){
 imap_config(workerData).then((res) => {
     start_imap(res).catch(err => parentPort!.postMessage(err))
 }).catch(err => {
-    parentPort!.postMessage("error")
+    // parentPort!.postMessage("error")
+    console.log("error")
 })

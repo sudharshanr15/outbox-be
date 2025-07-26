@@ -1,4 +1,5 @@
 import { post_message } from "./slack"
+import socket_client from "./socket_client"
 import { post_webbook } from "./webhook"
 
 type FunctionResponse = {
@@ -28,12 +29,12 @@ async function ping(){
     });
 }
 
-export async function create(index: string, id: string, document: any){
-  try{
+export async function create({index, id, document}: {index: string, id: string, document: any}){
+    try{
     await es_client.index({
         index,
         id,
-        op_type: 'create',
+        // op_type: 'create',
         document
     });
     if(document.label.toLowerCase() == "interested"){
@@ -41,6 +42,22 @@ export async function create(index: string, id: string, document: any){
         post_message(document)
         post_webbook(document)
     }
+
+    const res = await es_client.search({
+        index: "mails",
+        query: {
+            match: {
+                "_id": id
+            }
+        },
+        size: 1
+    })
+
+    // real-time update to frontend
+    const email = document.to[0].address;
+    const room = btoa(email)
+    socket_client.getConnection().io.to(room).emit("receive-mail", res)
+
   }catch(error){
     console.log("index already exists")
   }
