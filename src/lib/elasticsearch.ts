@@ -130,7 +130,7 @@ export async function get_user_label_mails(user: string, label: string): Promise
                     must: [
                         {
                             match: {
-                                "to.address": user
+                                "to.address.keyword": user
                             }
                         },
                         {
@@ -169,7 +169,7 @@ export async function search_user_mails(user: string, search: string){
                     "must": [
                         {
                             "match": {
-                                "to.address": user
+                                "to.address.keyword": user
                             }
                         },
                         {
