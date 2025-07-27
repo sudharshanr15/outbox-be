@@ -4,22 +4,36 @@ A Node.js backend application for fetching, classifying, and indexing emails usi
 
 ## Features
 
-- Fetch emails from IMAP (Gmail supported)
-- Classify emails using a trained classifier and add labels to the envelope
-- Index emails in Elasticsearch
-- Connect multiple mail accounts with IDLE IMAP support
-- Real-time new mail notifications to frontend
-- Slack and webhook integration to send automated email on interested labels
-- REST API for frontend integration
+- Connect to Gmail (or any IMAP-compatible server) using secure IMAP
+- Support for multiple email accounts with persistent IDLE connection
+- Fetch and process new emails in real-time
+- Automatically classify emails using a trained machine learning model
+- Label emails as: `Interested`, `Not Interested`, `Spam`, `Meeting Booked`, or `Out Of Office`
+- Store and index emails using Elasticsearch for fast and powerful search
+- Emit new email events to frontend via WebSocket
+- Automatically send Slack notifications for emails labeled as `Interested`
+- Trigger custom webhooks on specific email labels
+- Provide API endpoints for frontend to fetch emails and account data
 
 ## Architecture
 
-- The backend makes use of `imapflow` package to connect to an IMAP server `imap.gmail.com` to fetch and classify emails.
-- Fetched emails from `imapflow` are stored on Elasticsearch via index.
-- Each email envelope is passed to an email classifier using `natural` package to categorize labels into `Interested`, `Not Interested`, `Spam`, `Meeting Booked`, `Out Of Office` 
-- Real-time updates (e.g., new mail notifications) are detected using `imapflow` event listeners.
-- New emails are stored inside Elasticsearch and sent to slack and webhooks if the label is mentioned as `Interested`
-- The frontend (in a separate repo) connects to the backend to display and manage emails.
+- **`imapflow`**  
+  Connects to multiple Gmail accounts using IMAP IDLE for real-time email fetching.
+
+- **`natural`**  
+  Processes and labels each fetched email into categories such as `Interested`, `Not Interested`, `Spam`, `Meeting Booked`, and `Out Of Office`.
+
+- **`Elasticsearch`**  
+  Stores and indexes classified emails for fast search and retrieval.
+
+- **`socket.io`**  
+  Sends new mail updates to the frontend application in real-time.
+
+- **Automation Hooks (Slack & Webhooks)**  
+  Automatically sends details of emails labeled as `Interested` to Slack and webhook endpoints.
+
+- **REST API**  
+  Exposes endpoints for frontend to interact with stored emails and account info.
 
 ## Prerequisites
 
@@ -31,8 +45,8 @@ A Node.js backend application for fetching, classifying, and indexing emails usi
 1. **Clone the repository:**
 
    ```bash
-   git clone git@github.com:sudharshanr15/outbox-be.git
-   cd outbox/
+   git clone https://github.com/sudharshanr15/outbox-be.git
+   cd outbox-be/
    ```
 
 2. **Install dependencies:**
@@ -55,10 +69,18 @@ A Node.js backend application for fetching, classifying, and indexing emails usi
    ```bash
    npm run train
    ```
-5. **Front-end Interface**
+
+5. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+   - Open [http://localhost:5000](http://localhost:3000) in your browser.
+
+
+6. **Front-end Interface**
     The front-end web application is maintained on a separate repository. You can find the source code here:
     ```
-    git@github.com:sudharshanr15/outbox-fe.git
+    https://github.com/sudharshanr15/outbox-fe.git
     ```
 
 
